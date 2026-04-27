@@ -1,0 +1,19 @@
+﻿version: "2"
+run:
+  timeout: 3m
+
+linters:
+  default: none
+  enable:
+    - govet
+    - staticcheck
+    - errcheck
+    - unused
+formatters:
+  enable:
+    - gofmt
+    - goimports
+
+issues:
+  exclude-use-default: false
+  new: true

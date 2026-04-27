@@ -1,0 +1,74 @@
+﻿version: "3.7"
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: my-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    networks:
+      - infrastructure_default
+
+  service-courier:
+    build:
+      context: .
+      target: service
+      args:
+        CMD_PATH: ./cmd/service-courier
+        BIN_NAME: app
+    env_file: [ .env ]
+    ports:
+      - "${COURIER_PORT}:${COURIER_PORT}"
+      - "127.0.0.1:6060:6060"
+    environment:
+      PORT: "${COURIER_PORT}"
+    networks:
+      - infrastructure_default
+    depends_on:
+      - postgres
+  worker:
+    build:
+      context: .
+      target: worker
+      args:
+        CMD_PATH: ./cmd/worker
+        BIN_NAME: app
+    env_file: [ .env ]
+    networks:
+      - infrastructure_default
+    depends_on:
+      - postgres
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    networks:
+      - infrastructure_default
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      - infrastructure_default
+
+
+volumes:
+  pgdata:
+  prometheus-data:
+  grafana-data:
+
+networks:
+  infrastructure_default:
+    external: true
