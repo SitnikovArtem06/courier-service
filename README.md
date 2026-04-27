@@ -40,9 +40,7 @@ docker network create infrastructure_default
 
 Этот микросервис является частью общей микросервисной архитектуры, поэтому для полноценной работы нужно запустить все связанные сервисы.
 
-Если подняты `postgres`, `service-courier` и применены миграции, будет работать базовый HTTP API (курьеры, назначение/снятие через ручные запросы).
-
-Событийная обработка заказов корректно работает только при запущенных внешних зависимостях.
+Без внешних сервисов текущий compose-проект работает некорректно.
 
 Нужно отдельно запустить:
 
@@ -55,6 +53,6 @@ docker network create infrastructure_default
 
 ```bash
 go install github.com/pressly/goose/v3/cmd/goose@latest
-goose -dir migrations postgres "$GOOSE_DBSTRING" up
+goose -dir migrations up
 ```
 
